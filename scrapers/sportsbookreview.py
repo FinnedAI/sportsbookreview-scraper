@@ -268,13 +268,37 @@ class NHLOddsScraper(OddsScraper):
         new_df["3rdPeriod"] = df[6]
         new_df["final"] = df[7]
         new_df["open_ml"] = df[8]
+        new_df["open_ml"] = new_df["open_ml"].apply(
+            lambda x: float(x) if x != "-" else 0
+        )
         new_df["close_ml"] = df[9]
+        new_df["close_ml"] = new_df["close_ml"].apply(
+            lambda x: float(x) if x != "-" else 0
+        )
         new_df["close_spread"] = df[10] if season > 2013 else 0
+        new_df["close_spread"] = new_df["close_spread"].apply(
+            lambda x: float(x) if x != "NL" else 0
+        )
         new_df["close_spread_odds"] = df[11] if season > 2013 else 0
+        new_df["close_spread_odds"] = new_df["close_spread_odds"].apply(
+            lambda x: float(x) if x != "NL" else 0
+        )
         new_df["open_over_under"] = df[12] if season > 2013 else df[10]
+        new_df["open_over_under"] = new_df["open_over_under"].apply(
+            lambda x: float(x) if x != "NL" else 0
+        )
         new_df["open_over_under_odds"] = df[13] if season > 2013 else df[11]
+        new_df["open_over_under_odds"] = new_df["open_over_under_odds"].apply(
+            lambda x: float(x) if x != "NL" else 0
+        )
         new_df["close_over_under"] = df[14] if season > 2013 else df[12]
+        new_df["close_over_under"] = new_df["close_over_under"].apply(
+            lambda x: float(x) if x != "NL" else 0
+        )
         new_df["close_over_under_odds"] = df[15] if season > 2013 else df[13]
+        new_df["close_over_under_odds"] = new_df["close_over_under_odds"].apply(
+            lambda x: float(x) if x != "NL" and x != "a100" else 0
+        )
 
         return new_df
 
@@ -395,7 +419,7 @@ class MLBOddsScraper(OddsScraper):
         new_df["8thInn"] = df[12]
         new_df["9thInn"] = df[13]
         new_df["final"] = df[14]
-        new_df["open_ml"] = df[17]
+        new_df["open_ml"] = df[15]
         new_df["close_ml"] = df[16]
         new_df["close_spread"] = df[17] if season > 2013 else 0
         new_df["close_spread_odds"] = df[18] if season > 2013 else 0
