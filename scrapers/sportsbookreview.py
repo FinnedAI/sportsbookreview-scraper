@@ -3,11 +3,25 @@ import pandas as pd
 from itertools import tee
 import json
 import io
-import logging
 
 
 class OddsScraper:
     def __init__(self, sport, years):
+        self.blacklist = [
+            "pk",
+            "PK",
+            "NL",
+            "nl",
+            "a100",
+            "a100",
+            "a105",
+            "a105",
+            "a110",
+            "a110",
+            ".5+03",
+            ".5ev",
+            "-",
+        ]
         self.sport = sport
         self.translator = json.load(open("config/translated.json", "r"))
         self.seasons = years
@@ -100,55 +114,48 @@ class NFLOddsScraper(OddsScraper):
         new_df["3rdQtr"] = df[6]
         new_df["4thQtr"] = df[7]
         new_df["final"] = df[8]
-        _open = df[9].apply(lambda x: 0 if str(x).lower() == "pk" else x)
+        _open = df[9].apply(lambda x: 0 if x in self.blacklist else x)
         new_df["open_odds"] = _open
-        close = df[10].apply(lambda x: 0 if str(x).lower() == "pk" else x)
+        close = df[10].apply(lambda x: 0 if x in self.blacklist else x)
         new_df["close_odds"] = close
         new_df["close_ml"] = df[11]
-        h2 = df[12].apply(lambda x: 0 if str(x).lower() == "pk" else x)
+        h2 = df[12].apply(lambda x: 0 if x in self.blacklist else x)
         new_df["2H_odds"] = h2
         return new_df
 
     def _to_schema(self, df):
-        df = df.dropna(how="any").reset_index(drop=True)
-        df = df[df["2H_odds"] != "NL"].reset_index(drop=True)
         new_df = self.schema.copy()
+        df = df.fillna(0)
         progress = df.iterrows()
         for (i1, row), (i2, next_row) in self._pairwise(progress):
-            try:
-                home_ml = int(next_row["close_ml"])
-                away_ml = int(row["close_ml"])
+            home_ml = int(next_row["close_ml"])
+            away_ml = int(row["close_ml"])
 
-                odds1 = float(row["open_odds"])
-                odds2 = float(next_row["open_odds"])
-                if odds1 < odds2:
-                    open_spread = odds1
-                    close_spread = float(row["close_odds"])
-                    h2_spread = float(row["2H_odds"])
+            odds1 = float(row["open_odds"])
+            odds2 = float(next_row["open_odds"])
+            if odds1 < odds2:
+                open_spread = odds1
+                close_spread = float(row["close_odds"])
+                h2_spread = float(row["2H_odds"])
 
-                    h2_total = float(next_row["2H_odds"])
-                    open_ou = odds2
-                    close_ou = float(next_row["close_odds"])
-                else:
-                    open_spread = odds2
-                    close_spread = float(next_row["close_odds"])
-                    h2_spread = float(next_row["2H_odds"])
+                h2_total = float(next_row["2H_odds"])
+                open_ou = odds2
+                close_ou = float(next_row["close_odds"])
+            else:
+                open_spread = odds2
+                close_spread = float(next_row["close_odds"])
+                h2_spread = float(next_row["2H_odds"])
 
-                    h2_total = float(row["2H_odds"])
-                    open_ou = odds1
-                    close_ou = float(row["close_odds"])
+                h2_total = float(row["2H_odds"])
+                open_ou = odds1
+                close_ou = float(row["close_odds"])
 
-                home_open_spread = -open_spread if home_ml < away_ml else open_spread
-                away_open_spread = -home_open_spread
-                home_close_spread = -close_spread if home_ml < away_ml else close_spread
-                away_close_spread = -home_close_spread
-                h2_home_spread = -h2_spread if home_ml < away_ml else h2_spread
-                h2_away_spread = -h2_home_spread
-            except Exception as e:
-                logging.error(
-                    f"Encountered error: {e} when reformatting data, params {row['season']}"
-                )
-                continue
+            home_open_spread = -open_spread if home_ml < away_ml else open_spread
+            away_open_spread = -home_open_spread
+            home_close_spread = -close_spread if home_ml < away_ml else close_spread
+            away_close_spread = -home_close_spread
+            h2_home_spread = -h2_spread if home_ml < away_ml else h2_spread
+            h2_away_spread = -h2_home_spread
 
             new_df["season"].append(row["season"])
             new_df["date"].append(row["date"])
@@ -269,42 +276,42 @@ class NHLOddsScraper(OddsScraper):
         new_df["final"] = df[7]
         new_df["open_ml"] = df[8]
         new_df["open_ml"] = new_df["open_ml"].apply(
-            lambda x: float(x) if x != "-" else 0
+            lambda x: 0 if x in self.blacklist else x
         )
         new_df["close_ml"] = df[9]
         new_df["close_ml"] = new_df["close_ml"].apply(
-            lambda x: float(x) if x != "-" else 0
+            lambda x: 0 if x in self.blacklist else x
         )
         new_df["close_spread"] = df[10] if season > 2013 else 0
         new_df["close_spread"] = new_df["close_spread"].apply(
-            lambda x: float(x) if x != "NL" else 0
+            lambda x: 0 if x in self.blacklist else float(x)
         )
         new_df["close_spread_odds"] = df[11] if season > 2013 else 0
         new_df["close_spread_odds"] = new_df["close_spread_odds"].apply(
-            lambda x: float(x) if x != "NL" else 0
+            lambda x: 0 if x in self.blacklist else float(x)
         )
         new_df["open_over_under"] = df[12] if season > 2013 else df[10]
         new_df["open_over_under"] = new_df["open_over_under"].apply(
-            lambda x: float(x) if x != "NL" else 0
+            lambda x: 0 if x in self.blacklist else float(x)
         )
         new_df["open_over_under_odds"] = df[13] if season > 2013 else df[11]
         new_df["open_over_under_odds"] = new_df["open_over_under_odds"].apply(
-            lambda x: float(x) if x != "NL" else 0
+            lambda x: 0 if x in self.blacklist else float(x)
         )
         new_df["close_over_under"] = df[14] if season > 2013 else df[12]
         new_df["close_over_under"] = new_df["close_over_under"].apply(
-            lambda x: float(x) if x != "NL" else 0
+            lambda x: 0 if x in self.blacklist else float(x)
         )
         new_df["close_over_under_odds"] = df[15] if season > 2013 else df[13]
         new_df["close_over_under_odds"] = new_df["close_over_under_odds"].apply(
-            lambda x: float(x) if x != "NL" and x != "a100" else 0
+            lambda x: 0 if x in self.blacklist else float(x)
         )
 
         return new_df
 
     def _to_schema(self, df):
-        df = df.dropna(how="any").reset_index(drop=True)
         new_df = self.schema.copy()
+        df = df.fillna(0)
         progress = df.iterrows()
         for (i1, row), (i2, next_row) in self._pairwise(progress):
             new_df["season"].append(row["season"])
@@ -319,10 +326,10 @@ class NHLOddsScraper(OddsScraper):
             new_df["away_3rdPeriod"].append(row["3rdPeriod"])
             new_df["home_final"].append(next_row["final"])
             new_df["away_final"].append(row["final"])
-            new_df["home_open_ml"].append(next_row["open_ml"])
-            new_df["away_open_ml"].append(row["open_ml"])
-            new_df["home_close_ml"].append(next_row["close_ml"])
-            new_df["away_close_ml"].append(row["close_ml"])
+            new_df["home_open_ml"].append(int(next_row["open_ml"]))
+            new_df["away_open_ml"].append(int(row["open_ml"]))
+            new_df["home_close_ml"].append(int(next_row["close_ml"]))
+            new_df["away_close_ml"].append(int(row["close_ml"]))
             new_df["home_close_spread"].append(next_row["close_spread"])
             new_df["away_close_spread"].append(row["close_spread"])
             new_df["home_close_spread_odds"].append(next_row["close_spread_odds"])
@@ -392,8 +399,10 @@ class MLBOddsScraper(OddsScraper):
             "away_9thInn": [],
             "home_final": [],
             "away_final": [],
-            "open_ml": [],
-            "close_ml": [],
+            "home_open_ml": [],
+            "away_open_ml": [],
+            "home_close_ml": [],
+            "away_close_ml": [],
             "close_spread": [],
             "close_spread_odds": [],
             "open_over_under": [],
@@ -431,7 +440,6 @@ class MLBOddsScraper(OddsScraper):
         return new_df
 
     def _to_schema(self, df):
-        df = df.dropna(how="any").reset_index(drop=True)
         new_df = self.schema.copy()
         progress = df.iterrows()
         for (i1, row), (i2, next_row) in self._pairwise(progress):
@@ -459,8 +467,10 @@ class MLBOddsScraper(OddsScraper):
             new_df["away_9thInn"].append(row["9thInn"])
             new_df["home_final"].append(next_row["final"])
             new_df["away_final"].append(row["final"])
-            new_df["open_ml"].append(next_row["open_ml"])
-            new_df["close_ml"].append(next_row["close_ml"])
+            new_df["home_open_ml"].append(next_row["open_ml"])
+            new_df["away_open_ml"].append(row["open_ml"])
+            new_df["home_close_ml"].append(next_row["close_ml"])
+            new_df["away_close_ml"].append(row["close_ml"])
             new_df["close_spread"].append(next_row["close_spread"])
             new_df["close_spread_odds"].append(next_row["close_spread_odds"])
             new_df["open_over_under"].append(next_row["open_over_under"])
