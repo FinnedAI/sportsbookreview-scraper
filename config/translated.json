@@ -59,6 +59,8 @@
         "BAL": "Baltimore",
         "BOS": "Boston",
         "NYM": "N.Y. Mets",
-        "WAS": "Washington"
+        "WAS": "Washington",
+        "CIN": "Cincinnati",
+        "LOS": "Los Angeles"
     }
 }
