@@ -252,14 +252,10 @@ class NHLOddsScraper(OddsScraper):
             "away_close_spread": [],
             "home_close_spread_odds": [],
             "away_close_spread_odds": [],
-            "home_open_over_under": [],
-            "away_open_over_under": [],
-            "home_open_over_under_odds": [],
-            "away_open_over_under_odds": [],
-            "home_close_over_under": [],
-            "away_close_over_under": [],
-            "home_close_over_under_odds": [],
-            "away_close_over_under_odds": [],
+            "open_over_under": [],
+            "open_over_under_odds": [],
+            "close_over_under": [],
+            "close_over_under_odds": [],
         }
 
     def _reformat_data(self, df, season, covid=False):
@@ -335,16 +331,10 @@ class NHLOddsScraper(OddsScraper):
             new_df["away_close_spread"].append(row["close_spread"])
             new_df["home_close_spread_odds"].append(next_row["close_spread_odds"])
             new_df["away_close_spread_odds"].append(row["close_spread_odds"])
-            new_df["home_open_over_under"].append(next_row["open_over_under"])
-            new_df["away_open_over_under"].append(row["open_over_under"])
-            new_df["home_open_over_under_odds"].append(next_row["open_over_under_odds"])
-            new_df["away_open_over_under_odds"].append(row["open_over_under_odds"])
-            new_df["home_close_over_under"].append(next_row["close_over_under"])
-            new_df["away_close_over_under"].append(row["close_over_under"])
-            new_df["home_close_over_under_odds"].append(
-                next_row["close_over_under_odds"]
-            )
-            new_df["away_close_over_under_odds"].append(row["close_over_under_odds"])
+            new_df["open_over_under"].append(next_row["open_over_under"])
+            new_df["open_over_under_odds"].append(next_row["open_over_under_odds"])
+            new_df["close_over_under"].append(next_row["close_over_under"])
+            new_df["close_over_under_odds"].append(next_row["close_over_under_odds"])
 
         return pd.DataFrame(new_df)
 
