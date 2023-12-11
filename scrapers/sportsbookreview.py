@@ -394,8 +394,10 @@ class MLBOddsScraper(OddsScraper):
             "away_open_ml": [],
             "home_close_ml": [],
             "away_close_ml": [],
-            "close_spread": [],
-            "close_spread_odds": [],
+            "home_close_spread": [],
+            "away_close_spread": [],
+            "home_close_spread_odds": [],
+            "away_close_spread_odds": [],
             "open_over_under": [],
             "open_over_under_odds": [],
             "close_over_under": [],
@@ -462,8 +464,10 @@ class MLBOddsScraper(OddsScraper):
             new_df["away_open_ml"].append(row["open_ml"])
             new_df["home_close_ml"].append(next_row["close_ml"])
             new_df["away_close_ml"].append(row["close_ml"])
-            new_df["close_spread"].append(next_row["close_spread"])
-            new_df["close_spread_odds"].append(next_row["close_spread_odds"])
+            new_df["home_close_spread"].append(next_row["close_spread"])
+            new_df["away_close_spread"].append(row["close_spread"])
+            new_df["home_close_spread_odds"].append(next_row["close_spread_odds"])
+            new_df["away_close_spread_odds"].append(row["close_spread_odds"])
             new_df["open_over_under"].append(next_row["open_over_under"])
             new_df["open_over_under_odds"].append(next_row["open_over_under_odds"])
             new_df["close_over_under"].append(next_row["close_over_under"])
