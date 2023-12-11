@@ -42,11 +42,12 @@ class OddsScraper:
         if len(date) == 3:
             date = f"0{date}"
         month = date[:2]
+        day = date[2:]
 
         if int(month) in range(start, yr_end + 1):
-            return f"{date}{season}"
+            return int(f"{season}{month}{day}")
 
-        return f"{date}{int(season) + 1}"
+        return int(f"{int(season) + 1}{month}{day}")
 
     @staticmethod
     def _pairwise(iterable):
