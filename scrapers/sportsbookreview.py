@@ -129,6 +129,9 @@ class NFLOddsScraper(OddsScraper):
         df = df.fillna(0)
         progress = df.iterrows()
         for (i1, row), (i2, next_row) in self._pairwise(progress):
+            if i1 % 2 != 0:
+                continue
+            
             home_ml = int(next_row["close_ml"])
             away_ml = int(row["close_ml"])
 
@@ -311,6 +314,9 @@ class NHLOddsScraper(OddsScraper):
         df = df.fillna(0)
         progress = df.iterrows()
         for (i1, row), (i2, next_row) in self._pairwise(progress):
+            if i1 % 2 != 0:
+                continue
+            
             new_df["season"].append(row["season"])
             new_df["date"].append(row["date"])
             new_df["home_team"].append(self._translate(next_row["name"]))
@@ -436,6 +442,9 @@ class MLBOddsScraper(OddsScraper):
         new_df = self.schema.copy()
         progress = df.iterrows()
         for (i1, row), (i2, next_row) in self._pairwise(progress):
+            if i1 % 2 != 0:
+                continue
+                     
             new_df["season"].append(row["season"])
             new_df["date"].append(row["date"])
             new_df["home_team"].append(self._translate(next_row["name"]))
