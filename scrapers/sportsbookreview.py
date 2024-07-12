@@ -128,10 +128,13 @@ class NFLOddsScraper(OddsScraper):
         new_df = self.schema.copy()
         df = df.fillna(0)
         progress = df.iterrows()
+        # remove the first row, as it is the header
+        next(progress)
         for (i1, row), (i2, next_row) in self._pairwise(progress):
-            if i1 % 2 != 0:
+            # skip every other row
+            if i1 % 2 == 0:
                 continue
-            
+
             home_ml = int(next_row["close_ml"])
             away_ml = int(row["close_ml"])
 
@@ -265,9 +268,11 @@ class NHLOddsScraper(OddsScraper):
         new_df = pd.DataFrame()
         new_df["season"] = [season] * len(df)
         new_df["date"] = df[0].apply(
-            lambda x: self._make_datestr(x, season)
-            if not covid
-            else self._make_datestr(x, season, start=1, yr_end=3)
+            lambda x: (
+                self._make_datestr(x, season)
+                if not covid
+                else self._make_datestr(x, season, start=1, yr_end=3)
+            )
         )
         new_df["name"] = df[3]
         new_df["1stPeriod"] = df[4]
@@ -313,10 +318,13 @@ class NHLOddsScraper(OddsScraper):
         new_df = self.schema.copy()
         df = df.fillna(0)
         progress = df.iterrows()
+        # remove the first row, as it is the header
+        next(progress)
         for (i1, row), (i2, next_row) in self._pairwise(progress):
-            if i1 % 2 != 0:
+            # skip every other row
+            if i1 % 2 == 0:
                 continue
-            
+
             new_df["season"].append(row["season"])
             new_df["date"].append(row["date"])
             new_df["home_team"].append(self._translate(next_row["name"]))
@@ -441,10 +449,12 @@ class MLBOddsScraper(OddsScraper):
     def _to_schema(self, df):
         new_df = self.schema.copy()
         progress = df.iterrows()
+        # remove the first row, as it is the header
+        next(progress)
         for (i1, row), (i2, next_row) in self._pairwise(progress):
             if i1 % 2 != 0:
                 continue
-                     
+
             new_df["season"].append(row["season"])
             new_df["date"].append(row["date"])
             new_df["home_team"].append(self._translate(next_row["name"]))
